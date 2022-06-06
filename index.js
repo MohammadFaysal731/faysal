@@ -84,6 +84,8 @@ async function run() {
 
 run().catch(console.dir);
 
+// console.log()
+
 app.get('/', (req, res) => {
     res.send('StorageDevicesServer')
 })
