@@ -20,40 +20,54 @@ async function run() {
         const featuresProductsCollection = client.db('Features').collection('products');
         const inventoryCollection = client.db('Delivered').collection('products')
 
-        // inventory items
+        //this api for all  inventory 
         app.get('/inventory', async (req, res) => {
             const query = {};
             const cursor = inventoryCollection.find(query);
             const inventories = await cursor.toArray();
             res.send(inventories);
-        })
-        // count inventory
+        });
+        // this api for count all inventory
         app.get('/inventoryCount', async (req, res) => {
             const count = await inventoryCollection.estimatedDocumentCount();
             res.send({ count });
-        })
-        // // inventory items by id
+        });
+        //this api for specific inventory 
         app.get('/inventory/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const inventoryItem = await inventoryCollection.findOne(query);
             res.send(inventoryItem)
+        });
+        // this api for update  inventory quantity
+        app.put('/inventory/:id', async (req, res) => {
+            const id = req.params.id;
+            const delivered = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    quantity: delivered.newQuantity
+                }
+            }
+            const result = await inventoryCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
         })
-        // add inventories item 
+        //this api for add new inventories  
         app.post('/inventory', async (req, res) => {
             const addItem = req.body;
             const newItem = await inventoryCollection.insertOne(addItem);
             res.send(newItem);
-        })
-        // delete manage inventories
+        });
+        //this api for delete manage inventories
         app.delete('/inventory/:id', async (req, res) => {
             const id = req.params.id
             const query = { _id: ObjectId(id) };
             const deleteItem = await inventoryCollection.deleteOne(query);
             res.send(deleteItem);
-        })
+        });
 
-        // features Products api 
+        //this api for features Products api 
         app.get('/products', async (req, res) => {
             const page = parseInt(req.query.page);
             const size = parseInt(req.query.size);
@@ -67,13 +81,12 @@ async function run() {
                 products = await cursor.toArray();
             }
             res.send(products);
-        })
-        console.log('data')
-        // features Products Count api 
+        });
+        // this api for count all features Products
         app.get('/productsCount', async (req, res) => {
             const count = await featuresProductsCollection.estimatedDocumentCount();
             res.send({ count })
-        })
+        });
 
 
     }
