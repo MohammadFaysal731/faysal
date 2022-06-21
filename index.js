@@ -17,15 +17,29 @@ async function run() {
 
     try {
         await client.connect();
-        const featuresProductsCollection = client.db('Features').collection('products');
-        const inventoryCollection = client.db('Delivered').collection('products')
+        const inventoryCollection = client.db('storage_devices').collection('inventories');
+        const featuresProductsCollection = client.db('storage_devices').collection('featureProducts');
 
-        //this api for all  inventory 
+        //this api for home inventory 
         app.get('/inventory', async (req, res) => {
+            const query = {};
+            const cursor = inventoryCollection.find(query);
+            const inventories = await cursor.limit(6).toArray();
+            res.send(inventories);
+        });
+        // this api for manage inventories
+        app.get('/inventories', async (req, res) => {
             const query = {};
             const cursor = inventoryCollection.find(query);
             const inventories = await cursor.toArray();
             res.send(inventories);
+        });
+        // this api for add inventory
+        app.post('/inventories', async (req, res) => {
+            const newProduct = req.body;
+            const query = { name: newProduct.name, description: newProduct.description, price: newProduct.price, quantity: newProduct.quantity, supplierName: newProduct.supplierName, sold: newProduct.sold, image: newProduct.image }
+            const addProduct = await inventoryCollection.insertOne(query);
+            res.send(addProduct);
         });
         // this api for count all inventory
         app.get('/inventoryCount', async (req, res) => {
@@ -66,7 +80,13 @@ async function run() {
             const deleteItem = await inventoryCollection.deleteOne(query);
             res.send(deleteItem);
         });
-
+        // this api for my item
+        app.get('/myitems', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const myItems = await inventoryCollection.find(query).toArray();
+            res.send(myItems);
+        })
         //this api for features Products api 
         app.get('/products', async (req, res) => {
             const page = parseInt(req.query.page);
