@@ -37,10 +37,17 @@ async function run() {
         // this api for add inventory
         app.post('/inventories', async (req, res) => {
             const newProduct = req.body;
-            const query = { name: newProduct.name, description: newProduct.description, price: newProduct.price, quantity: newProduct.quantity, supplierName: newProduct.supplierName, sold: newProduct.sold, image: newProduct.image }
+            const query = { email: newProduct.email, name: newProduct.name, description: newProduct.description, price: newProduct.price, quantity: newProduct.quantity, supplierName: newProduct.supplierName, sold: newProduct.sold, image: newProduct.image }
             const addProduct = await inventoryCollection.insertOne(query);
             res.send(addProduct);
         });
+        // this api for my inventory per email
+        app.get('/inventories', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const result = await inventoryCollection.find(query).toArray();
+            res.send(result);
+        })
         // this api for count all inventory
         app.get('/inventoryCount', async (req, res) => {
             const count = await inventoryCollection.estimatedDocumentCount();
@@ -80,13 +87,7 @@ async function run() {
             const deleteItem = await inventoryCollection.deleteOne(query);
             res.send(deleteItem);
         });
-        // this api for my item
-        app.get('/myitems', async (req, res) => {
-            const email = req.query.email;
-            const query = { email: email };
-            const myItems = await inventoryCollection.find(query).toArray();
-            res.send(myItems);
-        })
+
         //this api for features Products api 
         app.get('/products', async (req, res) => {
             const page = parseInt(req.query.page);
